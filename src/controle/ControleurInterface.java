@@ -23,14 +23,14 @@ public interface ControleurInterface {
 	
 	/**
 	 * Enregistre l'URL d'un controleur distant
-	 * @param url l'URL a memoriser
+	 * @param urlDistant l'URL a memoriser
 	 */
-	void enregistrerControleur(String url);
+	void enregistrerControleur(String urlDistant);
 	
 	/**
 	 * Oublie l'URL d'un controleur distant
-	 * @param url l'URL a oublier
+	 * @param urlDistant l'URL a oublier
 	 */
-	void oublierControleur(String url);
+	void oublierControleur(String urlDistant);
 	
 }
