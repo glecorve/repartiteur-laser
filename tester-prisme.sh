@@ -1,6 +1,12 @@
 #!/bin/bash
 #
-# ./run_client.sh <url_connecteur>
+# ./tester-prisme.sh
+#
+# Lance le prisme et l'enregistre dans l'annuaire RMI.
+#
+# Gwénolé Lecorvé
+# ENSSAT, Université de Rennes 1
+# Mai 2015
 #
 
 CLASS_PATH=./build/classes

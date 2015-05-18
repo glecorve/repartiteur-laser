@@ -1,6 +1,12 @@
 #!/bin/bash
 #
-# ./run_client.sh <url_connecteur>
+# ./tester-application.sh
+#
+# Teste l'application de répartiteur laser en lançant une configuration arbitraire. L'annuaire RMI est démarré, puis stoppé par le script.
+#
+# Gwénolé Lecorvé
+# ENSSAT, Université de Rennes 1
+# Mai 2015
 #
 
 CLASS_PATH=./build/classes
