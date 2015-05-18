@@ -5,17 +5,31 @@
  */
 package vue;
 
+import controle.PrismeBackend;
+import java.awt.Color;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JList;
+import modele.Annuaire;
+import modele.Prisme;
+import modele.PrismeException;
+
 /**
  *
  * @author Gwenole Lecorve
  */
-public class PrismeVue extends javax.swing.JFrame {
+public class PrismeVue extends javax.swing.JFrame implements Observer {
 
     /**
      * Creates new form PrismeVue
      */
-    public PrismeVue() {
+    public PrismeVue(PrismeBackend prismeBackend) {
         initComponents();
+        prismeBackend.getPrisme().addObserver(this);
+        prismeBackend.getAnnuaire().addObserver(this);
+        setVisible(true);
     }
 
     /**
@@ -27,121 +41,158 @@ public class PrismeVue extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        emetteurScrollPane = new javax.swing.JScrollPane();
+        emetteurList = new javax.swing.JList();
+        destinataireScrollPane = new javax.swing.JScrollPane();
+        destinataireList = new javax.swing.JList();
+        transmissionPanel = new javax.swing.JPanel();
+        emetteurLabel = new javax.swing.JLabel();
+        destinataireLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Simulateur de prisme");
+        setTitle("Prisme");
 
-        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(jList1);
+        emetteurList.setModel(new SortedListModel());
+        emetteurList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        emetteurScrollPane.setViewportView(emetteurList);
 
-        jScrollPane2.setViewportView(jList2);
+        destinataireList.setModel(new SortedListModel());
+        destinataireList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        destinataireScrollPane.setViewportView(destinataireList);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 160, Short.MAX_VALUE)
+        javax.swing.GroupLayout transmissionPanelLayout = new javax.swing.GroupLayout(transmissionPanel);
+        transmissionPanel.setLayout(transmissionPanelLayout);
+        transmissionPanelLayout.setHorizontalGroup(
+            transmissionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 142, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+        transmissionPanelLayout.setVerticalGroup(
+            transmissionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 10, Short.MAX_VALUE)
         );
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Emetteur");
+        emetteurLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        emetteurLabel.setText("Emetteur");
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Destinataire");
+        destinataireLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        destinataireLabel.setText("Destinataire");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(emetteurScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(destinataireScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(88, 88, 88)
+                        .addComponent(emetteurLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(23, 23, 23)
+                        .addComponent(transmissionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(destinataireLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(69, 69, 69)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(13, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(emetteurLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(destinataireLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap())
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(65, 65, 65))))))
+                        .addComponent(transmissionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(7, 7, 7)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(emetteurScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(destinataireScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(14, 14, 14))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PrismeVue.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PrismeVue.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PrismeVue.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PrismeVue.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new PrismeVue().setVisible(true);
-            }
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JList jList1;
-    private javax.swing.JList jList2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel destinataireLabel;
+    private javax.swing.JList destinataireList;
+    private javax.swing.JScrollPane destinataireScrollPane;
+    private javax.swing.JLabel emetteurLabel;
+    private javax.swing.JList emetteurList;
+    private javax.swing.JScrollPane emetteurScrollPane;
+    private javax.swing.JPanel transmissionPanel;
     // End of variables declaration//GEN-END:variables
+
+    protected void ajusterListe(JList liste, String urlASelectionnee) {
+        int selectionNouvelIndex;
+        SortedListModel listModel = (SortedListModel) liste.getModel();
+        try {
+            selectionNouvelIndex = listModel.getElementIndex(urlASelectionnee);
+            liste.setSelectedIndex(selectionNouvelIndex);
+        } catch (Exception ex) {
+            if (listModel.getSize() == 0) {
+        }
+                afficherErreur("Erreur lors de la mise a jour d'une liste", "L'URL \"" + urlASelectionnee + "\" n'est pas presente dans la liste.");
+            }
+    }
+    
+    protected void afficherTransmission(boolean transmissionEnCours) {
+        transmissionPanel.setBackground(transmissionEnCours?Color.red:null);
+    }
+    
+    protected void remplirListe(JList liste, Annuaire annuaire) {
+        String selection = (String) liste.getSelectedValue();
+        liste.removeAll();
+        SortedListModel listModel = (SortedListModel) liste.getModel();
+        listModel.clear();
+        for (String url : annuaire.getConnecteursDistants().keySet()) {
+            listModel.add(url);
+        }
+        liste.setModel(listModel);
+        
+        int selectionNouvelIndex;
+        try {
+            selectionNouvelIndex = listModel.getElementIndex(selection);
+            liste.setSelectedIndex(selectionNouvelIndex);
+        } catch (Exception ex) {
+            if (selection == null && listModel.getSize() > 0) {
+                liste.setSelectedIndex(0);
+            }
+        }
+    }
+    
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof Prisme) {
+            try {
+                ajusterListe(emetteurList, ((Prisme) o).getDepuisUrl());
+                ajusterListe(destinataireList, ((Prisme) o).getVersUrl());
+                afficherTransmission(((Prisme) o).tranmissionEnCours());
+            } catch (PrismeException ex) {
+                afficherErreur("Erreur lors de la mise a jour d'une liste", ex.getMessage());
+            }
+        }
+        else if (o instanceof Annuaire) {
+            remplirListe(emetteurList, (Annuaire) o);
+            remplirListe(destinataireList, (Annuaire) o);
+        }
+    }
+    
+    /**
+     * Affiche une boîte de dialogue correspondant à une erreur
+     *
+     * @param titre Titre de la boîte de dialogue
+     * @param contenu Détail du message d'erreur
+     */
+    public void afficherErreur(String titre, String contenu) {
+        new ErrorDialog(this, titre, contenu);
+    }
 }

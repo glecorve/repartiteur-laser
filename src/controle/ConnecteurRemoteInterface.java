@@ -15,17 +15,13 @@ import modele.ConnecteurException;
  */
 public interface ConnecteurRemoteInterface extends Remote {
 
-    public String getRemoteUrl() throws RemoteException;
+    public void enregistrerConnecteur(String urlConnecteurDistant, String urlControleurDistant) throws RemoteException;
 
-    public void enregistrerConnecteur(String urlConnecteur, String urlControleur) throws RemoteException;
+    public void oublierConnecteur(String urlConnecteurDistant) throws RemoteException;
 
-//    public void enregistrerConnecteur(String urlConnecteur, ConnecteurRemoteInterface connecteurDistant) throws RemoteException;
-    
-    public void oublierConnecteur(String urlConnecteur) throws RemoteException;
+    public void enregistrerControleur(String urlControleurDistant) throws RemoteException;
 
-    public void enregistrerControleur(String urlControleur) throws RemoteException;
-
-    public void oublierControleur(String urlControleur) throws RemoteException;
+    public void oublierControleur(String urlControleurDistant) throws RemoteException;
 
     public void recevoirMessage(modele.Message transmission) throws RemoteException, ConnecteurException;
 

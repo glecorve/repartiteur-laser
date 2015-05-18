@@ -1,11 +1,9 @@
 
-import controle.ConnecteurBackend;
-import java.lang.management.ManagementFactory;
+import controle.PrismeBackend;
 import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import modele.Connecteur;
 import vue.ConnecteurVue;
+import vue.PrismeVue;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,7 +15,7 @@ import vue.ConnecteurVue;
  *
  * @author Gwenole Lecorve
  */
-public class ConnecteurOptique {
+public class PrismeSimulateur {
     
     /**
      * @param args the command line arguments
@@ -63,17 +61,16 @@ public class ConnecteurOptique {
             url = args[0];
         }
         else {
-            url = "rmi://localhost:1099/" + ManagementFactory.getRuntimeMXBean().getName();
+            url = "rmi://localhost:1099/prisme";
         }
         
-        final Connecteur connecteur = new Connecteur();
-        final ConnecteurBackend connecteurBackend = new ConnecteurBackend(url, connecteur);
+        final PrismeBackend prismeBackend = new PrismeBackend(url);
         
         
 
         /* Create and display the form */
         new Thread() {
-            public void run() { new ConnecteurVue(connecteurBackend, connecteur); }
+            public void run() { new PrismeVue(prismeBackend); }
         }.start();
     }
 }

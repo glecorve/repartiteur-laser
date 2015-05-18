@@ -9,6 +9,7 @@ import controle.ConnecteurLocalInterface;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JFrame;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import modele.Annuaire;
@@ -45,6 +46,9 @@ public class ConnecteurVue extends JFrame implements Observer {
         demarrerToggleBouton.setEnabled(false);
         stopperBouton.setEnabled(false);
         destinataireList.setEnabled(false);
+        
+        DefaultCaret caret = (DefaultCaret)receptionTextPane.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         connecteur.addObserver(this);
         backend.getAnnuaire().addObserver(this);
@@ -354,11 +358,10 @@ public class ConnecteurVue extends JFrame implements Observer {
             selectionNouvelIndex = listModel.getElementIndex(selection);
             destinataireList.setSelectedIndex(selectionNouvelIndex);
         } catch (Exception ex) {
-            if (selection == null && listModel.getSize() > 0) {
+            if (selection == null || listModel.getSize() > 0) {
                 destinataireList.setSelectedIndex(0);
             }
         }
-        
         ajusterEtatBoutons();
     }
 

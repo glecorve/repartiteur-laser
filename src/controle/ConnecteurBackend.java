@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import modele.Annuaire;
 import modele.Connecteur;
 import modele.Message;
+import modele.PrismeException;
 
 /**
  *
@@ -27,31 +28,39 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
     
     protected String url;
     protected String controleurUrl;
+    protected String prismeUrl;
 
     protected Connecteur connecteur;
     final protected ControleurInterface controleur;
+    protected PrismeRemoteInterface prisme;
     
     protected Annuaire connecteursDistants;
 
     protected Semaphore semaphore;
     
-    public ConnecteurBackend(String url, Connecteur connecteur) throws RemoteException, MalformedURLException {
+    public ConnecteurBackend(String _url, Connecteur _connecteur) throws RemoteException, MalformedURLException {
         
-        this.url = url;
-        controleurUrl = url+"/controleur";
-
-        this.connecteur = connecteur;
+        this.url = _url;
+        this.controleurUrl = _url+"/controleur";
+        this.prismeUrl = "";
+        
+        this.connecteur = _connecteur;
         this.controleur = new StupideControleur(controleurUrl, this);
-
+        this.prisme = null;
+        
         this.connecteursDistants = new Annuaire();
         
         this.semaphore = new Semaphore(0, true);
     }
     
     @Override
-    public void finalize() throws ConnecteurException, RemoteException, NotBoundException, MalformedURLException {
-        deconnecterFibreOptique();
-        Naming.unbind(url);
+    public void finalize() throws ConnecteurException, RemoteException, NotBoundException, MalformedURLException, Throwable {
+        try {
+            deconnecterFibreOptique();
+            Naming.unbind(url);
+        } finally {
+            super.finalize();
+        }
     }
 
     @Override
@@ -59,11 +68,6 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
         return url;
     }
     
-    @Override
-    public String getRemoteUrl() {
-        return url;
-    }
-
     @Override
     public boolean estConnecte() {
         return connecteur.estConnecte();
@@ -87,10 +91,20 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
                 Remote o = Naming.lookup(name);
                 if (o instanceof ConnecteurRemoteInterface) {
                     // Enregistrement du connecteur courant
-                    System.out.println(url + ": Enregistrement auprès de " + name + " (" + ((ConnecteurRemoteInterface) o).getRemoteUrl() + ")");
+                    System.out.println(url + ": \tEnregistrement auprès de " + name);
                     ((ConnecteurRemoteInterface) o).enregistrerConnecteur(url, controleurUrl);
                     // Enregistrement d'un connecteur distant
                     enregistrerConnecteur(name, (ConnecteurRemoteInterface) o);
+                }
+                else if (o instanceof PrismeRemoteInterface) {
+                    if (prisme == null) {
+                        this.prismeUrl = name;
+                        prisme = (PrismeRemoteInterface) o;
+                        prisme.enregisterConnecteur(url);
+                    }
+                    else {
+                        throw new ConnecteurException("Plusieurs prismes semblent exister.");
+                    }
                 }
             }
         }
@@ -99,9 +113,15 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
 
     @Override
     public void deconnecterFibreOptique() throws ConnecteurException, RemoteException, MalformedURLException, NotBoundException {
-        // Enregistrer dans l'annuaire RMI
+        // Annuaire RMI
         Naming.unbind(url);
         
+        // Prisme
+        prisme.oublierConnecteur(url);
+        prismeUrl = "";
+        prisme = null;
+        
+        // Autres connecteurs
         for (ConnecteurRemoteInterface distant : connecteursDistants.getConnecteursDistants().values()) {
             try {
                 distant.oublierConnecteur(url);
@@ -111,26 +131,30 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
             }
         }
         connecteursDistants.vider();
+        
+        // Connecteur
         connecteur.deconnecter();
     }
 
     @Override
-    public void recevoirMessage(modele.Message message) throws RemoteException, ConnecteurException {
+    public synchronized void recevoirMessage(modele.Message message) throws RemoteException, ConnecteurException {
         if (!message.getUrlDestinataire().equals(url)) {
             throw new ConnecteurException("Message recu par le mauvais destinataire (" + message.getUrlDestinataire() +  " != " + url + ")");
         }
-        System.out.println(url + ": Message recu de " + message.getUrlEmetteur() + " \"" + message.getContenu() + "\"");
+        System.out.println(url + ": \tMessage recu de " + message.getUrlEmetteur() + " \"" + message.getContenu() + "\"");
         connecteur.ajouterMessage(message);
     }
 
     @Override
-    public synchronized void emettreMessage(String urlDistant, String message) throws InterruptedException, RemoteException, ConnecteurException {
+    public void emettreMessage(String urlDistant, String message) throws InterruptedException, RemoteException, ConnecteurException, PrismeException {
         synchronized (controleur) {
             controleur.demanderSectionCritique();
             semaphore.acquire();
-            System.out.println("Émission vers " + urlDistant + ": " + message);
-            ConnecteurRemoteInterface distant = connecteursDistants.chercherUrl(urlDistant);
-            distant.recevoirMessage(new Message(url, urlDistant, message));
+            System.out.println(url + ": \tÉmission vers " + urlDistant + ": " + message);
+//            ConnecteurRemoteInterface distant = connecteursDistants.chercherUrl(urlDistant);
+//            distant.recevoirMessage(new Message(url, urlDistant, message));
+            prisme.orienter(url, urlDistant);
+            prisme.transmettre(new Message(url, urlDistant, message));
             controleur.quitterSectionCritique();
         }
     }
@@ -138,18 +162,14 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
     @Override
     public void enregistrerConnecteur(String urlDistant, ConnecteurRemoteInterface distant) {
         connecteursDistants.ajouterConnecteurDistant(urlDistant, distant);
-        try {
-            System.out.println(url + ": Enregistrement de " + distant.getRemoteUrl());
-        } catch (RemoteException ex) {
-            Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        System.out.println(url + ": \tEnregistrement du connecteur " + urlDistant);
     }
 
     @Override
-    public void enregistrerConnecteur(String urlDistante, String urlControleurDistant) {
+    public synchronized void enregistrerConnecteur(String urlConnecteurDistant, String urlControleurDistant) {
         try {
-            ConnecteurRemoteInterface o = (ConnecteurRemoteInterface) Naming.lookup(urlDistante);
-            enregistrerConnecteur(urlDistante, o);
+            ConnecteurRemoteInterface o = (ConnecteurRemoteInterface) Naming.lookup(urlConnecteurDistant);
+            enregistrerConnecteur(urlConnecteurDistant, o);
             enregistrerControleur(urlControleurDistant);
         } catch (NotBoundException ex) {
             Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
@@ -161,23 +181,23 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
     }
 
     @Override
-    public void oublierConnecteur(String urlDistant) {
-        System.out.println(url + ": Oubli de " + urlDistant);
+    public synchronized void oublierConnecteur(String urlDistant) {
+        System.out.println(url + ": \tOubli du connecteur " + urlDistant);
         connecteursDistants.retirerConnecteurDistant(urlDistant);
     }
 
     @Override
-    public void enregistrerControleur(String urlDistante) {
+    public synchronized void enregistrerControleur(String urlDistante) {
         controleur.enregistrerControleur(urlDistante);
     }
 
     @Override
-    public void oublierControleur(String urlDistante) {
+    public synchronized void oublierControleur(String urlDistante) {
         controleur.oublierControleur(urlDistante);
     }
 
     @Override
-    public synchronized void recevoirAutorisation() {
+    public void recevoirAutorisation() {
         semaphore.release();
     }
     

@@ -6,6 +6,8 @@
 package vue;
 
 import java.awt.Component;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JOptionPane;
 
 /**
@@ -14,10 +16,8 @@ import javax.swing.JOptionPane;
  * @author Gwenole Lecorve
  */
 class ErrorDialog {
-
-    protected Component parentComponent;
-    protected String title;
-    protected String content;
+    
+    protected static Lock verrou = new ReentrantLock();
 
     /**
      * Constructeur
@@ -26,18 +26,20 @@ class ErrorDialog {
      * @param _title Titre
      * @param _content Détail du message d'erreur
      */
-    protected ErrorDialog(Component _parentComponent, String _title, String _content) {
-        parentComponent = _parentComponent;
-        title = _title;
-        content = _content;
+    protected ErrorDialog(final Component _parentComponent, final String _title, final String _content) {
         Thread t = new Thread(new Runnable() {
             public void run() {
-                JOptionPane.showMessageDialog(parentComponent,
-                        content,
-                        title,
-                        JOptionPane.ERROR_MESSAGE);
+                singletonRun(_parentComponent, _title, _content);
+                System.exit(1);
             }
         });
         t.start();
+    }
+    
+    protected static synchronized void singletonRun(Component _parentComponent, String _title, String _content) {
+        JOptionPane.showMessageDialog(_parentComponent,
+                        _content,
+                        _title,
+                        JOptionPane.ERROR_MESSAGE);
     }
 }

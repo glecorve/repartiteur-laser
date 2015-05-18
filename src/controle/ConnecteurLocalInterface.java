@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import modele.Annuaire;
+import modele.PrismeException;
 
 /**
  *
@@ -27,7 +28,7 @@ public interface ConnecteurLocalInterface {
     
     public void deconnecterFibreOptique() throws ConnecteurException, RemoteException, MalformedURLException, NotBoundException;
     
-    public void emettreMessage(String url, String message) throws InterruptedException, RemoteException, ConnecteurException;
+    public void emettreMessage(String url, String message) throws InterruptedException, RemoteException, ConnecteurException, PrismeException;
     
     public void enregistrerConnecteur(String url, ConnecteurRemoteInterface distant);
     

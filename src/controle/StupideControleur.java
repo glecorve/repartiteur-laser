@@ -21,29 +21,29 @@ public class StupideControleur implements ControleurInterface {
     
     @Override
     public void demanderSectionCritique() {
-        System.out.println(url + ": Demande de section critique enregistrée");
+        System.out.println(url + ": \tDemande de section critique enregistrée");
         signalerAutorisation();
     }
 
     @Override
     public synchronized void signalerAutorisation() {
-        System.out.println(url + ": Signalement de l'autorisation");
+        System.out.println(url + ": \tSignalement de l'autorisation");
         connecteur.recevoirAutorisation();
     }
 
     @Override
     public void quitterSectionCritique() {
-        System.out.println(url + ": Fin de section critique");
+        System.out.println(url + ": \tFin de section critique");
     }
 
     @Override
     public void enregistrerControleur(String urlDistant) {
-        System.out.println(url + ": Enregistrement de " + urlDistant);
+        System.out.println(url + ": \tEnregistrement du controleur " + urlDistant);
     }
 
     @Override
     public void oublierControleur(String urlDistant) {
-        System.out.println(url + ": Oubli de " + urlDistant);
+        System.out.println(url + ": \tOubli du controleur " + urlDistant);
     }
     
 }
