@@ -32,6 +32,8 @@ public interface ConnecteurLocalInterface {
     
     public void enregistrerConnecteur(String url, ConnecteurRemoteInterface distant);
     
+    public void oublierConnecteur(String url);
+    
     public void recevoirAutorisation();
     
 }

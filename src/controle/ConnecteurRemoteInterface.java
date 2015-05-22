@@ -16,8 +16,8 @@ import modele.ConnecteurException;
 public interface ConnecteurRemoteInterface extends Remote {
 
     public void enregistrerConnecteur(String urlConnecteurDistant, String urlControleurDistant) throws RemoteException;
-
-    public void oublierConnecteur(String urlConnecteurDistant) throws RemoteException;
+    
+    public void oublierConnecteur(String urlConnecteurDistant, String urlControleurDistant) throws RemoteException;
 
     public void enregistrerControleur(String urlControleurDistant) throws RemoteException;
 

@@ -113,9 +113,6 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
 
     @Override
     public void deconnecterFibreOptique() throws ConnecteurException, RemoteException, MalformedURLException, NotBoundException {
-        // Annuaire RMI
-        Naming.unbind(url);
-        
         // Prisme
         prisme.oublierConnecteur(url);
         prismeUrl = "";
@@ -124,8 +121,7 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
         // Autres connecteurs
         for (ConnecteurRemoteInterface distant : connecteursDistants.getConnecteursDistants().values()) {
             try {
-                distant.oublierConnecteur(url);
-                distant.oublierControleur(controleurUrl);
+                distant.oublierConnecteur(url, controleurUrl);
             } catch (RemoteException ex) {
                 Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -134,6 +130,9 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
         
         // Connecteur
         connecteur.deconnecter();
+        
+        // Annuaire RMI
+        Naming.unbind(url);
     }
 
     @Override
@@ -185,6 +184,22 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
     public synchronized void oublierConnecteur(String urlDistant) {
         System.out.println(url + ": \tOubli du connecteur " + urlDistant);
         connecteursDistants.retirerConnecteurDistant(urlDistant);
+    }
+    
+    @Override
+    public synchronized void oublierConnecteur(String urlConnecteurDistant, String urlControleurDistant) {
+        try {
+            ConnecteurRemoteInterface o = (ConnecteurRemoteInterface) Naming.lookup(urlConnecteurDistant);
+            oublierConnecteur(urlConnecteurDistant);
+            oublierControleur(urlControleurDistant);
+            o.oublierControleur(controleurUrl);
+        } catch (NotBoundException ex) {
+            Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RemoteException ex) {
+            Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
