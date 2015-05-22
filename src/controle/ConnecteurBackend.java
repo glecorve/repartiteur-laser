@@ -171,6 +171,7 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
             ConnecteurRemoteInterface o = (ConnecteurRemoteInterface) Naming.lookup(urlConnecteurDistant);
             enregistrerConnecteur(urlConnecteurDistant, o);
             enregistrerControleur(urlControleurDistant);
+            o.enregistrerControleur(controleurUrl);
         } catch (NotBoundException ex) {
             Logger.getLogger(ConnecteurBackend.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MalformedURLException ex) {
