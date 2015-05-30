@@ -46,8 +46,8 @@ public class ConnecteurVue extends JFrame implements Observer {
         demarrerToggleBouton.setEnabled(false);
         stopperBouton.setEnabled(false);
         destinataireList.setEnabled(false);
-        
-        DefaultCaret caret = (DefaultCaret)receptionTextPane.getCaret();
+
+        DefaultCaret caret = (DefaultCaret) receptionTextPane.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         connecteur.addObserver(this);
@@ -55,7 +55,7 @@ public class ConnecteurVue extends JFrame implements Observer {
 
         setVisible(true);
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -249,6 +249,7 @@ public class ConnecteurVue extends JFrame implements Observer {
                 }
                 ajusterEtatBoutons();
             } catch (Exception ex) {
+                ex.printStackTrace();
                 afficherErreur("Erreur de déconnexion", ex.getMessage());
             }
         } else {
@@ -258,6 +259,7 @@ public class ConnecteurVue extends JFrame implements Observer {
                 connectionBouton.setText("Déconnecter la fibre optique");
                 ajusterEtatBoutons();
             } catch (Exception ex) {
+                ex.printStackTrace();
                 afficherErreur("Erreur de déconnexion", ex.getMessage());
             }
         }
@@ -267,6 +269,7 @@ public class ConnecteurVue extends JFrame implements Observer {
         try {
             backend.emettreMessage((String) destinataireList.getSelectedValue(), emissionTextArea.getText());
         } catch (Exception ex) {
+            ex.printStackTrace();
             afficherErreur("Erreur lors de l'emission du message", ex.getMessage());
         }
     }//GEN-LAST:event_emettreBoutonActionPerformed
@@ -296,6 +299,7 @@ public class ConnecteurVue extends JFrame implements Observer {
         try {
             backend.deconnecterFibreOptique();
         } catch (Exception ex) {
+            ex.printStackTrace();
             afficherErreur("Erreur lors de la fermeture", ex.getMessage());
         }
     }//GEN-LAST:event_formWindowClosing
@@ -352,7 +356,7 @@ public class ConnecteurVue extends JFrame implements Observer {
             listModel.add(url);
         }
         destinataireList.setModel(listModel);
-        
+
         int selectionNouvelIndex;
         try {
             selectionNouvelIndex = listModel.getElementIndex(selection);
@@ -370,6 +374,7 @@ public class ConnecteurVue extends JFrame implements Observer {
             HTMLDocument doc = (HTMLDocument) receptionTextPane.getDocument();
             ((HTMLEditorKit) receptionTextPane.getEditorKitForContentType("text/html")).insertHTML(doc, doc.getLength(), texte, 0, 0, null);
         } catch (Exception ex) {
+            ex.printStackTrace();
             afficherErreur("Erreur lors de l'affichage d'un message recu", ex.getMessage());
         }
     }
@@ -397,7 +402,6 @@ public class ConnecteurVue extends JFrame implements Observer {
         new ErrorDialog(this, titre, contenu);
     }
 
-
     protected class EmissionThread extends Thread {
 
         JFrame parent;
@@ -411,6 +415,7 @@ public class ConnecteurVue extends JFrame implements Observer {
                 try {
                     backend.emettreMessage((String) destinataireList.getSelectedValue(), emissionTextArea.getText());
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                     new ErrorDialog(parent, "Erreur lors de l'emission du message", ex.getMessage());
                 }
             }

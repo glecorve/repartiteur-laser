@@ -146,16 +146,16 @@ public class ConnecteurBackend extends UnicastRemoteObject implements Connecteur
 
     @Override
     public void emettreMessage(String urlDistant, String message) throws InterruptedException, RemoteException, ConnecteurException, PrismeException {
-        synchronized (controleur) {
             controleur.demanderSectionCritique();
             semaphore.acquire();
+            System.out.println(url + ": \tEntree en section critique");
             System.out.println(url + ": \t…mission vers " + urlDistant + ": " + message);
 //            ConnecteurRemoteInterface distant = connecteursDistants.chercherUrl(urlDistant);
 //            distant.recevoirMessage(new Message(url, urlDistant, message));
             prisme.orienter(url, urlDistant);
             prisme.transmettre(new Message(url, urlDistant, message));
             controleur.quitterSectionCritique();
-        }
+            System.out.println(url + ": \tSortie de la section critique");
     }
 
     @Override
